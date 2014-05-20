@@ -6,9 +6,11 @@ from werkzeug.exceptions import HTTPException, NotFound
 import simplejson
 import datetime
 import sqlite3
+import re
 
 class MarkingPoint(object):
     def __init__(self, lat=0, lon=0, remark=None):
+        self.id = None
         self.createTime = datetime.datetime.now()
         self.lat = lat
         self.lon = lon
@@ -19,36 +21,38 @@ class MarkingPoint(object):
             'createTime': self.createTime.isoformat() if self.createTime is not None else '',
             'lat': self.lat,
             'lon': self.lon,
-            'remark': self.remark}
+            'remark': self.remark,
+            'id': self.id}
 
 class CarMPDB(object):
     def __init__(self, infile):
         self.infile = infile
         
     def getAllCars(self):
-        self.sqlite = sqlite3.connect(self.infile)
-        query = "SELECT createTime, lat, lon, remark FROM cars WHERE enabled=1"
+        self.sqlite = sqlite3.connect(self.infile, detect_types=sqlite3.PARSE_DECLTYPES)
+        query = "SELECT createTime, lat, lon, remark, id FROM cars WHERE enabled=1"
         carList = []
         c = self.sqlite.cursor()
         c.execute(query)
         i = c.fetchone()
         while i is not None:
             car = MarkingPoint()
-            car.createTime = None
+            car.createTime = i[0]
             car.lat = i[1]
             car.lon = i[2]
             car.remark = i[3]
+            car.id = i[4]
             carList.append(car)
             i = c.fetchone()
         c.close()
         return carList
 
     def addCar(self, car):
-        self.sqlite = sqlite3.connect(self.infile)
+        self.sqlite = sqlite3.connect(self.infile, detect_types=sqlite3.PARSE_DECLTYPES)
         try:
             c = self.sqlite.cursor()
-            c.execute("INSERT INTO cars (lat, lon, remark, enabled) VALUES (?, ?, ?, 1)",
-                      (car.lat, car.lon, car.remark))
+            c.execute("INSERT INTO cars (lat, lon, remark, createTime, enabled) VALUES (?, ?, ?, ?, 1)",
+                      (car.lat, car.lon, car.remark, car.createTime))
             self.sqlite.commit()
             c.close()
         except Exception, e:
@@ -66,6 +70,7 @@ class TrabantMap(object):
             Rule('/parts', endpoint='part_map'),
             Rule('/new', endpoint='new_item'),
             Rule('/admin', endpoint='admin'),
+            Rule('/static/<string:resource>', endpoint='static_get'),
         ])
 
         self.cars = CarMPDB('cars.db')
@@ -78,24 +83,32 @@ class TrabantMap(object):
         except HTTPException, e:
             return e
 
-    def render_template(self, template, **context):
+    def on_static_get(self, request, resource=None):
+        if resource is None:
+            raise NotFound()
+        if re.match('/', resource):
+            raise NotFound()
         try:
-            source = open(template, 'r')
+            source = open('static/' + resource, 'r')
+            # TODO -- this is completely retarded
         except Exception, e:
-            return 'ERROR'
-        data = source.read()
-        source.close()
-        return Response(data, mimetype='text/html')
+            raise NotFound()
+        mimetype = 'octet/binary'
+        if re.match('.*.html$', resource):
+            mimetype = 'text/html'
+        elif re.match('.*.js$', resource):
+            mimetype = 'application/javascript'
+        return Response(source.read(), mimetype=mimetype)
 
     def on_root_map(self, request):
-        return self.render_template('map.html')
+        return self.on_static_get(request, resource='map.html')
 
     def on_car_map(self, request):
         cars = self.cars.getAllCars()
         jsonCars = []
         for i in cars:
             jsonCars.append(i.toJson())
-            
+
         return Response(simplejson.dumps(jsonCars), mimetype='text/json')
 
     def on_new_item(self, request):
