@@ -1,0 +1,6 @@
+CREATE TABLE cars (
+  createTime TEXT,
+  lat REAL,
+  lon REAL,
+  remark TEXT,
+  enabled INTEGER);

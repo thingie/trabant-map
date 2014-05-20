@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script> 
+
+ <title>mapa trabantů</title>
+</head>
+<body>
+ <h1>mapa</h1>
+
+ <div id="map" style="width: 800px; height: 600px; float: left;"></div>
+ <div style="float: left; width: 350px;">
+ <form id="newPointForm">
+   <label for="form-lat">Latitude</label> <input type="text" id="form-lat"> <br>
+   <label for="form-lon">Longitude</label> <input type="text" id="form-lon"> <br>
+   <label for="form-remark">Memo</label> <input type="text" id="form-remark"> <br>
+   <input type="button" value="send" id="npSend">
+ </form>
+ <p id="markerInfo"></p>
+
+<div id="debug">
+</div>
+</div>
+ 
+ <script>
+    function sendNewItem() {
+      var r = new XMLHttpRequest();
+      var form = document.getElementById("newPointForm");
+      var fdata = new FormData();
+      fdata.append('lat', document.getElementById("form-lat").value);
+      fdata.append('lon', document.getElementById("form-lon").value);
+      fdata.append('remark', document.getElementById("form-remark").value);
+      r.onload = function(e) {
+        var data = JSON.parse(this.responseText);
+        alert(data);
+      };
+      r.open("POST", "/new", true);
+      //r.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
+      r.send(fdata);
+    }
+    document.getElementById('npSend').onclick = sendNewItem;
+   
+   var map = L.map('map').setView([50.0792, 14.4032], 14);
+   L.tileLayer('https://{s}.tiles.mapbox.com/v3/pinkpony.i9mae5c5/{z}/{x}/{y}.png', {
+   attribution: 'map data &copy; [mapbox.com]',
+   maxZoom: 18
+   }).addTo(map);
+   var marker = L.marker([0, 0]);
+
+   function onMapClick(e) {
+     document.getElementById('form-lat').value = e.latlng.lat;
+     document.getElementById('form-lon').value = e.latlng.lng;
+
+     marker.setLatLng(e.latlng);
+     marker.addTo(map);
+   }
+   map.on('click', onMapClick);
+
+   var markers = [];
+   var myr = new XMLHttpRequest();
+   myr.open('get', '/cars', false);
+   myr.onload = function() {
+     var mymarkers = JSON.parse(this.responseText);
+     for (var i = 0; i < mymarkers.length; i++) {
+       markers.push(mymarkers[i]);
+     }
+   };
+   myr.send();
+
+   function showDetails(marker, e) {
+     var remark = document.getElementById('markerInfo');
+     remark.innerHTML = this.remark;
+   }
+
+   for (var i = 0; i < markers.length; i++) {
+     var nm = L.marker([markers[i].lat, markers[i].lon]);
+     nm.on('click', showDetails, markers[i]);
+     nm.addTo(map);
+   }
+ </script>
+</body>
+</html>
