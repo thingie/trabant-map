@@ -14,3 +14,4 @@ TODO
  - potřebujeme všechny 4 "vrstvy" a nějaké přepínání mezi nima
  - nějaká grafika
  - dokážeme nějak hledat? (uff, těžko)
+ - be able to query points just for a section of the map and limit the maximum
