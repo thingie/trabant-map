@@ -32,7 +32,9 @@ class PointSqliteDatabase(object):
                 queryData.append(ptype)
 
             if boundingBox is not None:
-                assert len(boundingBox) == 4
+                if len(boundingBox) != 4 or \
+                   not all(type(i) == float for i in boundingBox):
+                    raise Exception("Invalid bounding box")
                 query += " AND lat > ? AND lon > ? AND lat < ? AND lon < ?"
                 query += queryData.append(boundingBox)
 
