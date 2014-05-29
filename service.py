@@ -34,7 +34,7 @@ class TrabantMap(object):
         ])
 
         self.config = TrabantConfig(config)
-        self.points = PointSqliteDatabase({'sqlfile': 'cars.db'})
+        self.points = PointSqliteDatabase({'sqlfile': 'points.db'})
         logging.debug('TrabantMap instatiated')
 
     def dispatch_request(self, request):
@@ -76,21 +76,25 @@ class TrabantMap(object):
         return Response(simplejson.dumps(jsonCars), mimetype='text/json')
 
     def on_new_item(self, request):
-        valid = true
+        valid = True
         try:
             latitude = float(request.form.get('lat'))
             longitude = float(request.form.get('lon'))
             remark = request.form.get('remark')
 
             if latitude < -90 or latitude > 90:
-                valid = false
+                logging.info('latitude %f is invalid', latitude)
+                valid = False
             if longitude < -180 or longitude > 180:
-                valid = false
+                logging.info('longitude %f is invalid', longitude)
+                valid = False
 
             if len(remark) > self.config.remarkLimit:
-                valid = false
+                logging.info('remark is too long')
+                valid = False
         except Exception, e:
-            valid = false
+            logging.warning('validation error: %s', e)
+            valid = False
 
         if not valid:
             return Response(simplejson.dumps(['FAIL', 'invalid input']), mimetype='text/json')

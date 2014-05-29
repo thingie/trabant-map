@@ -9,10 +9,12 @@ import logging
 
 class PointSqliteDatabase(object):
     def __init__(self, config=None):
+        logging.info('initiating d from %s', config['sqlfile'])
         if config is not None:
             self.sqlite = sqlite3.connect(config['sqlfile'],
                                           detect_types=sqlite3.PARSE_DECLTYPES,
                                           check_same_thread=False)
+            logging.info('opened db from file: %s', config['sqlfile'])
         else:
             raise Exception("no config provided for the database")
 
