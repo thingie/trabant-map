@@ -6,6 +6,7 @@ var newmarker = L.marker([0, 0]);
 function hideNewMarker(e) {
     map.removeLayer(newmarker);
     document.getElementById('newPointForm').style.display = 'none';
+    document.getElementById("form-remark").value = '';
 
 };
 newmarker.on('click', hideNewMarker);
@@ -87,6 +88,7 @@ function sendNewItem() {
     if (ok) {
         map.removeLayer(newmarker);
         document.getElementById('newPointForm').style.display = 'none';
+        document.getElementById("form-remark").value = '';
     }
 }
 document.getElementById('npSend').onclick = sendNewItem;
