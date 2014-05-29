@@ -1,7 +1,8 @@
-CREATE TABLE cars (
+CREATE TABLE points (
 id INTEGER PRIMARY KEY,
 createTime TIMESTAMP,
 lat REAL,
 lon REAL,
 remark TEXT,
-enabled INTEGER);
+enabled INTEGER,
+ptype TEXT);
