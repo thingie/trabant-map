@@ -11,6 +11,15 @@ import logging
 from libtm.markingpoint import MarkingPoint
 from libtm.datasource import PointSqliteDatabase
 
+class TrabantConfig(object):
+    def __init__(self, config):
+        if 'remarkLimit' in config:
+            self.remarkLimit = int(config['remarkLimit'])
+            logging.info('remarkLimit set to %d', self.remarkLimit)
+        else:
+            self.remarkLimit = 1024
+            logging.info('remarkLimit defaults to %d', self.remarkLimit)
+
 class TrabantMap(object):
     def __init__(self, config):
         self.url_map = Map([
@@ -24,6 +33,7 @@ class TrabantMap(object):
             Rule('/static/<string:resource>', endpoint='static_get'),
         ])
 
+        self.config = TrabantConfig(config)
         self.points = PointSqliteDatabase({'sqlfile': 'cars.db'})
         logging.debug('TrabantMap instatiated')
 
@@ -66,11 +76,30 @@ class TrabantMap(object):
         return Response(simplejson.dumps(jsonCars), mimetype='text/json')
 
     def on_new_item(self, request):
+        valid = true
+        try:
+            latitude = float(request.form.get('lat'))
+            longitude = float(request.form.get('lon'))
+            remark = request.form.get('remark')
+
+            if latitude < -90 or latitude > 90:
+                valid = false
+            if longitude < -180 or longitude > 180:
+                valid = false
+
+            if len(remark) > self.config.remarkLimit:
+                valid = false
+        except Exception, e:
+            valid = false
+
+        if not valid:
+            return Response(simplejson.dumps(['FAIL', 'invalid input']), mimetype='text/json')
+
         mp = MarkingPoint()
         try:
-            mp.lat = float(request.form.get('lat'))
-            mp.lon = float(request.form['lon'])
-            mp.remark = request.form['remark']
+            mp.lat = latitude
+            mp.lon = longitude
+            mp.remark = remark
             mp.ptype = 'car'
             self.points.addPoint(mp)
         except Exception, e:
