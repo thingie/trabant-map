@@ -5,6 +5,7 @@ Database connector
 from markingpoint import MarkingPoint
 import sqlite3
 import threading
+import logging
 
 class PointSqliteDatabase(object):
     def __init__(self, config=None):
@@ -50,6 +51,7 @@ class PointSqliteDatabase(object):
                 i = c.fetchone()
             c.close()
         except Exception, e:
+            logging.error('Failed to query the db: %s', e)
             raise Exception("failed to read db")
         finally:
             self.dblock.release()
@@ -57,6 +59,7 @@ class PointSqliteDatabase(object):
         return points
 
     def addPoint(self, markingPoint):
+        logging.info('Creating new point %r', markingPoint)
         try:
             self.dblock.acquire()
             c = self.sqlite.cursor()
@@ -67,7 +70,7 @@ class PointSqliteDatabase(object):
             c.close()
             return True
         except Exception, e:
+            logging.error('Failed to create a point: %s', e)
             raise Exception("Failed to add a car: %s" % e)
-            return False
         finally:
             self.dblock.release()

@@ -5,8 +5,8 @@ from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, NotFound
 import simplejson
 import datetime
-import sqlite3
 import re
+import logging
 
 from libtm.markingpoint import MarkingPoint
 from libtm.datasource import PointSqliteDatabase
@@ -25,11 +25,13 @@ class TrabantMap(object):
         ])
 
         self.points = PointSqliteDatabase({'sqlfile': 'cars.db'})
+        logging.debug('TrabantMap instatiated')
 
     def dispatch_request(self, request):
         adapter = self.url_map.bind_to_environ(request.environ)
         try:
             endpoint, values = adapter.match()
+            logging.debug('Request on_%s', endpoint)
             return getattr(self, 'on_' + endpoint)(request, **values)
         except HTTPException, e:
             return e
@@ -49,6 +51,7 @@ class TrabantMap(object):
             mimetype = 'text/html'
         elif re.match('.*.js$', resource):
             mimetype = 'application/javascript'
+        logging.debug('static file "%s", mimetype=%s', resource, mimetype)
         return Response(source.read(), mimetype=mimetype)
 
     def on_root_map(self, request):
