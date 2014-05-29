@@ -68,12 +68,28 @@ class TrabantMap(object):
         return self.on_static_get(request, resource='map.html')
 
     def on_car_map(self, request):
-        cars = self.points.getPoints(ptype='car')
-        jsonCars = []
-        for i in cars:
-            jsonCars.append(i.toJson())
+        points = self.points.getPoints(ptype='car')
+        return Response(
+            simplejson.dumps(map(lambda x: x.toJson(), points)),
+            mimetype='text/json')
 
-        return Response(simplejson.dumps(jsonCars), mimetype='text/json')
+    def on_shop_map(self, request):
+        points = self.points.getPoints(ptype='shop')
+        return Response(
+            simplejson.dumps(map(lambda x: x.toJson(), points)),
+            mimetype='text/json')
+
+    def on_club_map(self, request):
+        points = self.points.getPoints(ptype='club')
+        return Response(
+            simplejson.dumps(map(lambda x: x.toJson(), points)),
+            mimetype='text/json')
+
+    def on_part_map(self, request):
+        points = self.points.getPoints(ptype='part')
+        return Response(
+            simplejson.dumps(map(lambda x: x.toJson(), points)),
+            mimetype='text/json')
 
     def on_new_item(self, request):
         valid = True
@@ -81,6 +97,7 @@ class TrabantMap(object):
             latitude = float(request.form.get('lat'))
             longitude = float(request.form.get('lon'))
             remark = request.form.get('remark')
+            ptype = request.form.get('ptype') or 'car'
 
             if latitude < -90 or latitude > 90:
                 logging.info('latitude %f is invalid', latitude)
@@ -92,6 +109,11 @@ class TrabantMap(object):
             if len(remark) > self.config.remarkLimit:
                 logging.info('remark is too long')
                 valid = False
+
+            if ptype not in ('car', 'shop', 'part', 'club'):
+                logging.info('invalid ptype "%s"', ptype)
+                valid = False
+
         except Exception, e:
             logging.warning('validation error: %s', e)
             valid = False
@@ -104,7 +126,7 @@ class TrabantMap(object):
             mp.lat = latitude
             mp.lon = longitude
             mp.remark = remark
-            mp.ptype = 'car'
+            mp.ptype = ptype
             self.points.addPoint(mp)
         except Exception, e:
             return Response(simplejson.dumps(['FAIL', str(e)]), mimetype='text/json')
