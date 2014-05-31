@@ -61,6 +61,8 @@ class TrabantMap(object):
             mimetype = 'text/html'
         elif re.match('.*.js$', resource):
             mimetype = 'application/javascript'
+        elif re.match('.*.css$', resource):
+            mimetype = 'text/css'
         logging.debug('static file "%s", mimetype=%s', resource, mimetype)
         return Response(source.read(), mimetype=mimetype)
 

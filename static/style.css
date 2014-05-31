@@ -1,0 +1,21 @@
+#layerSelect {
+    position: absolute;
+    width: 15em;
+    top: 30px;
+    right: 30px;
+    }
+
+.prettyForm {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+#newPointForm {
+    position: absolute;
+    width: 350px;
+    height: 5em;
+    top: 30px;
+    left: 100px;
+}
