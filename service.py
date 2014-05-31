@@ -67,29 +67,23 @@ class TrabantMap(object):
     def on_root_map(self, request):
         return self.on_static_get(request, resource='map.html')
 
-    def on_car_map(self, request):
-        points = self.points.getPoints(ptype='car')
+    def getPoints(self, ptype):
+        points = self.points.getPoints(ptype=ptype)
         return Response(
-            simplejson.dumps(map(lambda x: x.toJson(), points)),
+            simplejson.dumps([x.toJson() for x in points]),
             mimetype='text/json')
+
+    def on_car_map(self, request):
+        return self.getPoints('car')
 
     def on_shop_map(self, request):
-        points = self.points.getPoints(ptype='shop')
-        return Response(
-            simplejson.dumps(map(lambda x: x.toJson(), points)),
-            mimetype='text/json')
+        return self.getPoints('shop')
 
     def on_club_map(self, request):
-        points = self.points.getPoints(ptype='club')
-        return Response(
-            simplejson.dumps(map(lambda x: x.toJson(), points)),
-            mimetype='text/json')
+        return self.getPoints('club')
 
     def on_part_map(self, request):
-        points = self.points.getPoints(ptype='part')
-        return Response(
-            simplejson.dumps(map(lambda x: x.toJson(), points)),
-            mimetype='text/json')
+        return self.getPoints('part')
 
     def on_new_item(self, request):
         valid = True
