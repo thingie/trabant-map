@@ -73,13 +73,24 @@ function sendNewItem() {
     fdata.append('lat', document.getElementById("form-lat").value);
     fdata.append('lon', document.getElementById("form-lon").value);
     fdata.append('remark', document.getElementById("form-remark").value);
+
+    var ptype = 'car';
+    var ptypeInputs = document.getElementsByName('ptype');
+    for (var i = 0; i < ptypeInputs.length; i++) {
+        if (ptypeInputs[i].checked == true) {
+            ptype = ptypeInputs[i].value;
+        }
+    }
+
+    fdata.append('ptype', ptype);
+
     r.onload = function(e) {
         var data = JSON.parse(this.responseText);
         if (data[0] == "OK") {
             ok = true;
             addMarker(data[1]);
         } else {
-            alert("Could not add the marker, try again (or something).");
+            alert("Could not add the marker, try again (or something)." + data[1]);
         }
     };
     r.open("POST", "/new", false);
@@ -89,6 +100,10 @@ function sendNewItem() {
         map.removeLayer(newmarker);
         document.getElementById('newPointForm').style.display = 'none';
         document.getElementById("form-remark").value = '';
+
+        // if we added a point of another type than is currently displayed
+        // we must hide it (but this is a bad design, in future, we won't
+        // allow it -- TODO
     }
 }
 document.getElementById('npSend').onclick = sendNewItem;

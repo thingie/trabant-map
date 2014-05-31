@@ -8,11 +8,15 @@
   </head>
   <body>
     <div id="map" style="width: 100%; height: 98vh; padding: 0; margin: 0;"></div>
-    <div style="position: absolute; width: 350px; height: 2em; top: 30px; left: 100px;">
+    <div style="position: absolute; width: 350px; height: 3em; top: 30px; left: 100px;">
       <form id="newPointForm" style="display: none; background-color: white; padding: 1em;">
         <input type="hidden" id="form-lat"> 
         <input type="hidden" id="form-lon">
-        <label for="form-remark">Description</label> <input style="width: 100%" type="text" id="form-remark">
+        <label for="form-remark">Description</label> <input style="width: 100%" type="text" id="form-remark"> <br>
+        <input type="radio" name="ptype" value="car" id="car_r" checked><label for="car_r">Car</label>
+        <input type="radio" name="ptype" value="shop" id="shop_r"><label for="shop_r">Shop</label>
+        <input type="radio" name="ptype" value="club" id="club_r"><label for="club_r">Club</label>
+        <input type="radio" name="ptype" value="part" id="part_r"><label for="part_r">Part</label>
         <input type="button" value="send" id="npSend">
       </form>
       
