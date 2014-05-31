@@ -40,8 +40,17 @@ function addNewClick(e) {
 }
 map.on('click', addNewClick);
 
+var itemType = '/cars';
+if (location.hash == '#shops') {
+    itemType = '/shops';
+} else if (location.hash == '#clubs') {
+    itemType = '/clubs';
+} else if (location.hash == '#parts') {
+    itemType = '/parts';
+}
+
 var myr = new XMLHttpRequest();
-myr.open('get', '/cars', false);
+myr.open('get', itemType, false);
 myr.onload = function() {
     var mymarkers = JSON.parse(this.responseText);
     for (var i = 0; i < mymarkers.length; i++) {

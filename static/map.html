@@ -3,24 +3,27 @@
   <head>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
     <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script> 
-    
+    <link href="/static/style.css" rel="stylesheet" type="text/css">
+
     <title>mapa trabantů</title>
   </head>
   <body>
     <div id="map" style="width: 100%; height: 98vh; padding: 0; margin: 0;"></div>
-    <div style="position: absolute; width: 350px; height: 3em; top: 30px; left: 100px;">
-      <form id="newPointForm" style="display: none; background-color: white; padding: 1em;">
-        <input type="hidden" id="form-lat"> 
-        <input type="hidden" id="form-lon">
-        <label for="form-remark">Description</label> <input style="width: 100%" type="text" id="form-remark"> <br>
-        <input type="radio" name="ptype" value="car" id="car_r" checked><label for="car_r">Car</label>
-        <input type="radio" name="ptype" value="shop" id="shop_r"><label for="shop_r">Shop</label>
-        <input type="radio" name="ptype" value="club" id="club_r"><label for="club_r">Club</label>
-        <input type="radio" name="ptype" value="part" id="part_r"><label for="part_r">Part</label>
-        <input type="button" value="send" id="npSend">
-      </form>
-      
+    <form id="newPointForm" class="prettyForm" style="display: none;">
+      <input type="hidden" id="form-lat"> 
+      <input type="hidden" id="form-lon">
+      <label for="form-remark">Description</label> <input style="width: 98%" type="text" id="form-remark"> <br>
+      <input type="radio" name="ptype" value="car" id="car_r" checked><label for="car_r">Car</label>
+      <input type="radio" name="ptype" value="shop" id="shop_r"><label for="shop_r">Shop</label>
+      <input type="radio" name="ptype" value="club" id="club_r"><label for="club_r">Club</label>
+      <input type="radio" name="ptype" value="part" id="part_r"><label for="part_r">Part</label>
+      <input type="button" value="send" id="npSend">
+    </form>
+
+    <div id="layerSelect" class="prettyForm">
+      <a href="/?n=c#cars">#cars</a> | <a href="/?n=s#shops">#shops</a> | <a href="/?n=p#parts">#parts</a> | <a href="/?n=cl#clubs">#clubs</a>
     </div>
+
     <script src="/static/app.js"></script>
   </body>
 </html>
