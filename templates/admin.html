@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <title>mapa trabantů &mdash; admin</title>
+  </head>
+
+  <body>
+    <h1>administrace</h1>
+    <table id="adminTable">
+      <thead class="admin">
+      <tr>
+        <th>ID</th>
+        <th>Typ</th>
+        <th>Čas vytvoření</th>
+        <th>Poloha</th>
+        <th>Popisek</th>
+        <th>Povolený</th>
+        <th>Akce</th>
+      </tr>
+      </thead>
+      <tbody class="admin">
+     {% for item in points %}
+      <tr>
+        <td>{{ item.id }}</td>
+        <td>{{ item.ptype }}</td>
+        <td>{{ item.createTime }}</td>
+        <td>{{ item.lat }}, {{ item.lon}}</td>
+        <td>{{ item.remark }}</td>
+        <td>{{ "ano" if item.enabled == 1 else "ne" }}</td>
+        <td><a href="/admin/disable?id={{ item.id }}">zakázat</a> <a href="/admin/enable?id={{ item.id }}">povolit</a></td>
+      </tr>
+     {% endfor %}
+      <tfoot>
+        <p id="paging">strana {{ page }} z {{ pageTotal }}, {{ itemTotal }} položek celkem</p>
+      </tfoot>
+      </tbody>
+    </table>
+  </body>
+
+</html>

@@ -7,6 +7,7 @@ import simplejson
 import datetime
 import re
 import logging
+from jinja2 import Template, Environment, FileSystemLoader
 
 from libtm.markingpoint import MarkingPoint
 from libtm.datasource import PointSqliteDatabase
@@ -30,11 +31,14 @@ class TrabantMap(object):
             Rule('/parts', endpoint='part_map'),
             Rule('/new', endpoint='new_item'),
             Rule('/admin', endpoint='admin'),
+            Rule('/admin/disable', endpoint='point_disable'),
+            Rule('/admin/enable', endpoint='point_enable'),
             Rule('/static/<string:resource>', endpoint='static_get'),
         ])
 
         self.config = TrabantConfig(config)
         self.points = PointSqliteDatabase({'sqlfile': 'points.db'})
+        self.jinjaenv = Environment(loader=FileSystemLoader('templates/'))
         logging.debug('TrabantMap instatiated')
 
     def dispatch_request(self, request):
@@ -128,6 +132,55 @@ class TrabantMap(object):
             return Response(simplejson.dumps(['FAIL', str(e)]), mimetype='text/json')
         return Response(simplejson.dumps(['OK', mp.toJson()]), mimetype='text/json')
 
+    def on_admin(self, request):
+        ptype = request.form.get('ptype') or None
+
+        page = 1
+        pageTotal = 1
+
+        typeCount = self.points.getPointCount(ptype=ptype)
+        points = self.points.getPoints(ptype=ptype, disabled=True)
+
+        template = self.jinjaenv.get_template('admin.html')
+        data = {
+            'itemTotal': typeCount,
+            'page': page,
+            'pageTotal': pageTotal,
+            'points': points,
+        }
+        return Response(template.render(data), mimetype='text/html')
+
+    def on_point_enable(self, request):
+        itemId = request.args.get('id') or None
+        if itemId is None:
+            return Response(simplejson.dumps(['FAIL', 'invalid input']),
+                            mimetype='text/json')
+
+        try:
+            self.points.changePoint(int(itemId), 'enable')
+        except Exception, e:
+            return Response(simplejson.dumps(['FAIL', 'query failed']),
+                            mimetype='text/json')
+            
+
+        return Response(simplejson.dumps(['OK']),
+                        mimetype='text/json')
+        
+    def on_point_disable(self, request):
+        itemId = request.args.get('id') or None
+        if itemId is None:
+            return Response(simplejson.dumps(['FAIL', 'invalid input']),
+                            mimetype='text/json')
+
+        try:
+            self.points.changePoint(int(itemId), 'disable')
+        except Exception, e:
+            return Response(simplejson.dumps(['FAIL', 'query failed']),
+                            mimetype='text/json')
+
+        return Response(simplejson.dumps(['OK']),
+                        mimetype='text/json')
+        
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         response = self.dispatch_request(request)

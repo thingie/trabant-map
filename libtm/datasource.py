@@ -20,24 +20,90 @@ class PointSqliteDatabase(object):
 
         self.dblock = threading.Lock()
 
-    def getPoints(self, boundingBox=None, ptype=None):
-        self.dblock.acquire()
-        points = []
+    def changePoint(self, itemId, action):
+        if action not in ('enable', 'disable'):
+            raise Exception("invalid action")
+        newState = 1 if action == 'enable' else 0
+
         try:
-            query = "SELECT createTime, lat, lon, remark, id, ptype FROM points WHERE enabled=1"
+            self.dblock.acquire()
+            query = "UPDATE points SET enabled=? WHERE id=?"
+
+            logging.warn("QUERY: %s", query)
+            c = self.sqlite.cursor()
+            c.execute(query, (newState, itemId))
+            self.sqlite.commit()
+            c.close()
+        except Exception, e:
+            logging.error('Failed to query the db: %s', e)
+            raise Exception("failed to read db")
+        finally:
+            self.dblock.release()
+
+    def getPointCount(self, boundingBox=None, ptype=None):
+        """
+        Check how many points of the given type and bounding box are there
+        """
+        self.dblock.acquire()
+        try:
+            query = "SELECT COUNT(1) FROM points"
+            queryLimit = []
             queryData = []
 
             if ptype is not None:
-                query += " AND ptype=?"
+                queryLimit.append(" ptype=? ")
                 queryData.append(ptype)
 
             if boundingBox is not None:
                 if len(boundingBox) != 4 or \
                    not all(type(i) == float for i in boundingBox):
                     raise Exception("Invalid bounding box")
-                query += " AND lat > ? AND lon > ? AND lat < ? AND lon < ?"
-                query += queryData.append(boundingBox)
+                queryLimit.append(" lat > ? AND lon > ? AND lat < ? AND lon < ? ")
 
+            if len(queryLimit):
+                query += " WHERE " + " AND ".join(queryLimit)
+
+            logging.warn("QUERY: %s", query)
+            c = self.sqlite.cursor()
+            c.execute(query, queryData)
+
+            i = c.fetchone()
+            return i[0]
+            c.close()
+        except Exception, e:
+            logging.error('Failed to query the db: %s', e)
+            raise Exception("failed to read db")
+        finally:
+            self.dblock.release()
+
+        return 0
+
+    def getPoints(self, boundingBox=None, ptype=None, disabled=False):
+        self.dblock.acquire()
+        points = []
+        try:
+            query = "SELECT createTime, lat, lon, remark, id, ptype, enabled FROM points"
+            limits = []
+            queryData = []
+
+            if not disabled: # not asking for disabled items
+                limits.append(" enabled=1 ")
+
+            if ptype is not None:
+                limits.append(" ptype=? ")
+                queryData.append(ptype)
+
+            if boundingBox is not None:
+                if len(boundingBox) != 4 or \
+                   not all(type(i) == float for i in boundingBox):
+                    raise Exception("Invalid bounding box")
+                limits.append(" lat > ? AND lon > ? AND lat < ? AND lon < ? ")
+                queryData.append(boundingBox)
+
+            if len(limits):
+                query += " WHERE " + " AND ".join(limits)
+
+            logging.warn("QUERY: %s", query)
             c = self.sqlite.cursor()
             c.execute(query, queryData)
 
@@ -50,6 +116,7 @@ class PointSqliteDatabase(object):
                 point.remark = i[3]
                 point.id = i[4]
                 point.ptype = i[5]
+                point.enabled = i[6]
 
                 points.append(point)
                 i = c.fetchone()
