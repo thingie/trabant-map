@@ -161,11 +161,10 @@ class TrabantMap(object):
         except Exception, e:
             return Response(simplejson.dumps(['FAIL', 'query failed']),
                             mimetype='text/json')
-            
 
         return Response(simplejson.dumps(['OK']),
                         mimetype='text/json')
-        
+
     def on_point_disable(self, request):
         itemId = request.args.get('id') or None
         if itemId is None:
@@ -180,7 +179,7 @@ class TrabantMap(object):
 
         return Response(simplejson.dumps(['OK']),
                         mimetype='text/json')
-        
+
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         response = self.dispatch_request(request)
