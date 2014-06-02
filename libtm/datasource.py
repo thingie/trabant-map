@@ -78,7 +78,17 @@ class PointSqliteDatabase(object):
 
         return 0
 
-    def getPoints(self, boundingBox=None, ptype=None, disabled=False):
+    def getPoints(self, boundingBox=None, ptype=None, disabled=False, limit=None, limitOffset=None):
+        """
+        Get points from the database
+
+        Optional constraints are:
+          boundingBox, tuple of exactly 4 ints
+          ptype, str
+          disabled, set true to get the disabled points as well
+          limit, how many rows
+          limitOffset, offset for limit
+        """
         self.dblock.acquire()
         points = []
         try:
@@ -102,6 +112,13 @@ class PointSqliteDatabase(object):
 
             if len(limits):
                 query += " WHERE " + " AND ".join(limits)
+
+            if limit is not None:
+                query += " LIMIT ? "
+                queryData.append(limit)
+                if limitOffset is not None:
+                    query += " OFFSET ? "
+                    queryData.append(limitOffset)
 
             logging.warn("QUERY: %s", query)
             c = self.sqlite.cursor()
