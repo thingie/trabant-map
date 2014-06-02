@@ -7,6 +7,7 @@ import simplejson
 import datetime
 import re
 import logging
+import math
 from jinja2 import Template, Environment, FileSystemLoader
 
 from libtm.markingpoint import MarkingPoint
@@ -134,12 +135,23 @@ class TrabantMap(object):
 
     def on_admin(self, request):
         ptype = request.args.get('ptype') or None
+        page = request.args.get('page')
+        try:
+            page = int(page)
+        except Exception, e:
+            page = 1
 
-        page = 1
-        pageTotal = 1
+        limit = 50 # TODO -- config value?
 
         typeCount = self.points.getPointCount(ptype=ptype)
-        points = self.points.getPoints(ptype=ptype, disabled=True)
+        if typeCount / limit >= 1:
+            pageTotal = int(math.ceil(typeCount / float(limit)))
+        else:
+            pageTotal = 1
+
+        limitOffset = (page - 1) * limit
+
+        points = self.points.getPoints(ptype=ptype, disabled=True, limit=limit, limitOffset=limitOffset)
 
         template = self.jinjaenv.get_template('admin.html')
         data = {
