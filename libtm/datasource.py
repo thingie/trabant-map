@@ -29,7 +29,7 @@ class PointSqliteDatabase(object):
             self.dblock.acquire()
             query = "UPDATE points SET enabled=? WHERE id=?"
 
-            logging.warn("QUERY: %s", query)
+            logging.debug("QUERY: %s", query)
             c = self.sqlite.cursor()
             c.execute(query, (newState, itemId))
             self.sqlite.commit()
@@ -63,7 +63,7 @@ class PointSqliteDatabase(object):
             if len(queryLimit):
                 query += " WHERE " + " AND ".join(queryLimit)
 
-            logging.warn("QUERY: %s", query)
+            logging.debug("QUERY: %s", query)
             c = self.sqlite.cursor()
             c.execute(query, queryData)
 
@@ -120,7 +120,7 @@ class PointSqliteDatabase(object):
                     query += " OFFSET ? "
                     queryData.append(limitOffset)
 
-            logging.warn("QUERY: %s", query)
+            logging.debug("QUERY: %s", query)
             c = self.sqlite.cursor()
             c.execute(query, queryData)
 
