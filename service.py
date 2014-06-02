@@ -39,7 +39,7 @@ class TrabantMap(object):
         self.config = TrabantConfig(config)
         self.points = PointSqliteDatabase({'sqlfile': 'points.db'})
         self.jinjaenv = Environment(loader=FileSystemLoader('templates/'))
-        logging.debug('TrabantMap instatiated')
+        logging.debug('TrabantMap instantiated')
 
     def dispatch_request(self, request):
         adapter = self.url_map.bind_to_environ(request.environ)
