@@ -133,7 +133,7 @@ class TrabantMap(object):
         return Response(simplejson.dumps(['OK', mp.toJson()]), mimetype='text/json')
 
     def on_admin(self, request):
-        ptype = request.form.get('ptype') or None
+        ptype = request.args.get('ptype') or None
 
         page = 1
         pageTotal = 1
