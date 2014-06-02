@@ -33,7 +33,10 @@
       </tr>
      {% endfor %}
       <tfoot>
-        <p id="paging">strana {{ page }} z {{ pageTotal }}, {{ itemTotal }} položek celkem</p>
+        <p id="paging">{% if page > 1 %}<a href="/admin?page={{ page-1 }}">&lt;&lt;</a>{% endif %}
+          strana {{ page }} z {{ pageTotal }}, {{ itemTotal }} položek celkem
+          {% if page < pageTotal %}<a href="/admin?page={{ page+1 }}">&gt;&gt;</a>{% endif %}
+        </p>
       </tfoot>
       </tbody>
     </table>
