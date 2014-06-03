@@ -21,13 +21,45 @@ function pointDebug(point) {
     str += 'createTime:' + point.createTime + ',\n';
     str += '}\n';
     return str;
+};
+
+function getTypeFromHash() {
+    if (location.hash != '') {
+        var h = location.hash.substring(1);
+        var itemType = h.split('&')[0];
+
+        return itemType;
+    } else {
+        return 'cars';
+    }
+};
+
+var lohash = location.hash.substr(1);
+var zoom = lohash.substr(lohash.indexOf('z=')).split('&')[0].split('=')[1];
+var lat = lohash.substr(lohash.indexOf('lat=')).split('&')[0].split('=')[1];
+var lon = lohash.substr(lohash.indexOf('lon=')).split('&')[0].split('=')[1];
+
+if (!zoom) {
+    zoom = 11;
+}
+if (!lat) {
+    lat = 50.0792;
+}
+if (!lon) {
+    lon = 14.4032;
 }
 
-var map = L.map('map').setView([50.0792, 14.4032], 11);
+var map = L.map('map').setView([lat, lon], zoom);
 L.tileLayer('https://{s}.tiles.mapbox.com/v3/pinkpony.i9mae5c5/{z}/{x}/{y}.png', {
     attribution: 'map data &copy; mapbox.com',
     maxZoom: 18
 }).addTo(map);
+
+function mapDragHandler(e) {
+    location.hash = '#' + getTypeFromHash() + '&z=' + map.getZoom() + '&lat=' + map.getCenter().lat +
+        '&lon=' + map.getCenter().lng;
+};
+map.on('move', mapDragHandler);
 
 // adding new markers 
 function addNewClick(e) {
@@ -41,11 +73,11 @@ function addNewClick(e) {
 map.on('click', addNewClick);
 
 var itemType = '/cars';
-if (location.hash == '#shops') {
+if (getTypeFromHash() == 'shops') {
     itemType = '/shops';
-} else if (location.hash == '#clubs') {
+} else if (getTypeFromHash() == 'clubs') {
     itemType = '/clubs';
-} else if (location.hash == '#parts') {
+} else if (getTypeFromHash() == 'parts') {
     itemType = '/parts';
 }
 
