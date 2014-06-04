@@ -21,6 +21,11 @@ class PointSqliteDatabase(object):
         self.dblock = threading.Lock()
 
     def changePoint(self, itemId, action):
+        """
+        Enable or disable itemId
+
+        action is 'enable' or 'disable'
+        """
         if action not in ('enable', 'disable'):
             raise Exception("invalid action")
         newState = 1 if action == 'enable' else 0
@@ -147,6 +152,9 @@ class PointSqliteDatabase(object):
         return points
 
     def addPoint(self, markingPoint):
+        """
+        Add a new markingPoint
+        """
         logging.info('Creating new point %r', markingPoint)
         try:
             self.dblock.acquire()
