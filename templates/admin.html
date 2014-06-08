@@ -1,26 +1,63 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="trabant map admin page">
+    <meta name="author" content="Honza Bartoš">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
     <title>mapa trabantů &mdash; admin</title>
   </head>
 
   <body>
-    <h1>administrace</h1>
-    <table id="adminTable">
-      <thead class="admin">
-      <tr>
-        <th>ID</th>
-        <th>Typ</th>
-        <th>Čas vytvoření</th>
-        <th>Poloha</th>
-        <th>Popisek</th>
-        <th>Povolený</th>
-        <th>Akce</th>
-      </tr>
-      </thead>
-      <tbody class="admin">
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+          </button>
+          <a class="navbar-brand" href="/admin">trabant-map</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/admin">Dashboard</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="main">
+
+          <h1 class="page-header">adminstrace dashboard</h1>
+          <h2 class="sub-header">body</h2>
+          <div class="row">
+            <p>{% if page > 1 %}<a href="/admin?page={{ page-1 }}">&lt;&lt;</a>{% endif %}
+              strana {{ page }} z {{ pageTotal }}, {{ itemTotal }} položek celkem
+              {% if page < pageTotal %}<a href="/admin?page={{ page+1 }}">&gt;&gt;</a>{% endif %}
+                           </p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table-striped table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Typ</th>
+                  <th>Čas vytvoření</th>
+                  <th>Poloha</th>
+                  <th>Popisek</th>
+                  <th>Povolený</th>
+                  <th>Akce</th>
+                </tr>
+              </thead>
+              <tbody>
      {% for item in points %}
       <tr>
         <td>{{ item.id }}</td>
@@ -28,18 +65,20 @@
         <td>{{ item.createTime }}</td>
         <td>{{ item.lat }}, {{ item.lon}}</td>
         <td>{{ item.remark }}</td>
-        <td>{{ "ano" if item.enabled == 1 else "ne" }}</td>
-        <td><a href="/admin/disable?id={{ item.id }}">zakázat</a> <a href="/admin/enable?id={{ item.id }}">povolit</a></td>
+        <td>{{ "<span class=\"glyphicon glyphicon-thumbs-up\"></span>" if item.enabled == 1 else "<span class=\"glyphicon glyphicon-ban-circle\"></span>" }}</td>
+        {% if item.enabled == 1 %}
+        <td><button type="button" class="btn btn-danger"><a href="/admin/disable?id={{ item.id }}">zakázat</a></button></td>
+        {% else %}
+        <td><button type="button" class="btn btn-success"><a href="/admin/enable?id={{ item.id }}">povolit</a></button></td>
+        {% endif %}
       </tr>
      {% endfor %}
-      <tfoot>
-        <p id="paging">{% if page > 1 %}<a href="/admin?page={{ page-1 }}">&lt;&lt;</a>{% endif %}
-          strana {{ page }} z {{ pageTotal }}, {{ itemTotal }} položek celkem
-          {% if page < pageTotal %}<a href="/admin?page={{ page+1 }}">&gt;&gt;</a>{% endif %}
-        </p>
-      </tfoot>
       </tbody>
-    </table>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 
 </html>
